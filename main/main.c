@@ -1,10 +1,12 @@
 #include <stdio.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "driver/gpio.h"
-#include "sdkconfig.h"
+#include "ServoMotor.h"
+
+void allTask(void)
+{
+    start_servomotor_task();
+}
 
 void app_main(void)
 {
-
+    //allTask();
 }
