@@ -37,10 +37,12 @@ static void UltrasonicTask(void *pvParameters)
             if(distance_cm < currentSetDistance_cm)
             {
                 ESP_LOGI("UltraSonic", "ALARM! Przeszkoda: %.1f cm (Prog: %d cm)", distance_cm, (int)currentSetDistance_cm);
+                xEventGroupSetBits(systemEventGroup, BIT_ALARM_ON);
             }
             else
             {
                 ESP_LOGI("UltraSonic", "Czysto!");
+                xEventGroupSetBits(systemEventGroup, BIT_ALARM_ON);
             }
         } 
         else

@@ -7,6 +7,8 @@
 #include "esp_log.h"
 #include "ServoMotor.h"
 
+#include "Communication.h"
+
 #define SERVO_PIN 25 //YELLOW
 
 static int32_t angle_to_duty_cycle(int32_t angle)
@@ -46,6 +48,13 @@ static void ServoTask(void *pvParameters)
 
     while(1)
     {
+        EventBits_t bits = xEventGroupGetBits(systemEventGroup);
+        
+        if (bits & BIT_ALARM_ON) {
+            vTaskDelay(pdMS_TO_TICKS(100));
+            continue; 
+        }
+
         // 0 -> 180
         for(int angle = 0; angle <= 180; angle += 10)
         {            

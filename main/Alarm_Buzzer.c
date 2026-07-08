@@ -2,6 +2,8 @@
 #include "freertos/task.h"
 #include "driver/gpio.h"
 
+#include "Communication.h"
+
 #define BUZZER_PIN 33 //PURPLE
 
 static void AlarmTask(void *pvParameters)
@@ -11,10 +13,16 @@ static void AlarmTask(void *pvParameters)
 
     while(1)
     {
+        xEventGroupWaitBits(systemEventGroup, BIT_ALARM_ON, pdFALSE, pdFALSE, portMAX_DELAY);
+
         gpio_set_level(BUZZER_PIN, 1);
-        vTaskDelay(pdMS_TO_TICKS(1000));
-        gpio_set_level(BUZZER_PIN, 0);   
-        vTaskDelay(pdMS_TO_TICKS(1000));
+
+        while( (xEventGroupGetBits(systemEventGroup) & BIT_ALARM_ON) != 0 )
+        {
+             vTaskDelay(pdMS_TO_TICKS(50)); // krótka drzemka, żeby nie zablokować procesora
+        }
+
+        gpio_set_level(BUZZER_PIN, 0);
     }
 }
 
