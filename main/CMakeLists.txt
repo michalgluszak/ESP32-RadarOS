@@ -6,6 +6,7 @@ idf_component_register(
         "Potentiometer.c"
         "Alarm_Buzzer.c"
         "Communication.c"
+        "st7735_lcd.c"
     INCLUDE_DIRS 
         "."
     REQUIRES
