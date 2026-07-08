@@ -3,9 +3,11 @@ idf_component_register(
         "main.c" 
         "ServoMotor.c" 
         "UltrasonicSensor.c"
+        "Potentiometer.c"
     INCLUDE_DIRS 
         "."
     REQUIRES
         ultrasonic
         esp_driver_ledc
+        esp_adc
 )
