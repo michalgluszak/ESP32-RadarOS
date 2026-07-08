@@ -11,6 +11,8 @@ static void AlarmTask(void *pvParameters)
     gpio_reset_pin(BUZZER_PIN);
     gpio_set_direction(BUZZER_PIN, GPIO_MODE_OUTPUT);
 
+    gpio_set_level(BUZZER_PIN, 0);
+
     while(1)
     {
         xEventGroupWaitBits(systemEventGroup, BIT_ALARM_ON, pdFALSE, pdFALSE, portMAX_DELAY);
@@ -19,7 +21,7 @@ static void AlarmTask(void *pvParameters)
 
         while( (xEventGroupGetBits(systemEventGroup) & BIT_ALARM_ON) != 0 )
         {
-             vTaskDelay(pdMS_TO_TICKS(50)); // krótka drzemka, żeby nie zablokować procesora
+             vTaskDelay(pdMS_TO_TICKS(50)); 
         }
 
         gpio_set_level(BUZZER_PIN, 0);

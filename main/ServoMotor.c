@@ -48,26 +48,30 @@ static void ServoTask(void *pvParameters)
 
     while(1)
     {
-        EventBits_t bits = xEventGroupGetBits(systemEventGroup);
-        
-        if (bits & BIT_ALARM_ON) {
-            vTaskDelay(pdMS_TO_TICKS(100));
-            continue; 
-        }
-
         // 0 -> 180
         for(int angle = 0; angle <= 180; angle += 10)
         {            
-            ESP_LOGI("Servo Motor", "Moving to %d degrees\n", angle);
+
+            while(xEventGroupGetBits(systemEventGroup) & BIT_ALARM_ON) {
+                vTaskDelay(pdMS_TO_TICKS(100)); 
+            }
+
+            ESP_LOGI("RADAR", "Kat serwa: %d stopni", angle);
+
             ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, angle_to_duty_cycle(angle));
-            ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0);
+            ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0);  
             vTaskDelay(pdMS_TO_TICKS(1000));
         }
 
         // 180 -> 0
         for(int angle = 170 ; angle >= 10 ; angle -= 10)
         {
-            ESP_LOGI("Servo Motor", "Moving to %d degrees\n", angle);
+            while(xEventGroupGetBits(systemEventGroup) & BIT_ALARM_ON) {
+                vTaskDelay(pdMS_TO_TICKS(100)); 
+            }
+            
+            ESP_LOGI("RADAR", "Kat serwa: %d stopni", angle);
+
             ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, angle_to_duty_cycle(angle));
             ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0);
             vTaskDelay(pdMS_TO_TICKS(1000));
