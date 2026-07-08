@@ -4,6 +4,7 @@
 #include "UltrasonicSensor.h"
 #include "Potentiometer.h"
 #include "Alarm_Buzzer.h"
+#include "Communication.h"
 
 void allTask(void)
 {
@@ -15,6 +16,6 @@ void allTask(void)
 
 void app_main(void)
 {
+    //init_communication();
     //allTask();
-    start_alarm_task();
 }

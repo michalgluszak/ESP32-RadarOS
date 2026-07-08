@@ -5,6 +5,7 @@ idf_component_register(
         "UltrasonicSensor.c"
         "Potentiometer.c"
         "Alarm_Buzzer.c"
+        "Communication.c"
     INCLUDE_DIRS 
         "."
     REQUIRES
