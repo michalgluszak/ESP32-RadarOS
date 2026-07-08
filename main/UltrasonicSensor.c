@@ -6,6 +6,7 @@
 #include <ultrasonic.h>
 
 #include "UltrasonicSensor.h"
+#include "Communication.h"
 
 #define TRIG_PIN 26 //BLUE
 #define ECHO_PIN 27 //GREEN
@@ -25,7 +26,9 @@ static void UltrasonicTask(void *pvParameters)
 
     while(1)
     {
-        esp_err_t res = ultrasonic_measure(&sensor, currentSetDistance_cm, &distance_m);
+        xQueuePeek(thresholdQueue, &currentSetDistance_cm, 0);
+
+        esp_err_t res = ultrasonic_measure(&sensor, 4.0, &distance_m);
 
         if (res == ESP_OK) 
         {

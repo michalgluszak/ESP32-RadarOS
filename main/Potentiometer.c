@@ -5,12 +5,17 @@
 #include "esp_err.h"
 
 #include "Potentiometer.h"
+#include "Communication.h"
 
 // GPIO35 WHITE
 #define ADC_PIN ADC_CHANNEL_7    
 #define ADC_UNIT ADC_UNIT_1      
 #define ADC_BITWIDTH ADC_BITWIDTH_12  
 #define ADC_ATTEN ADC_ATTEN_DB_12  
+
+static int32_t mapValue(int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, int32_t out_max) {
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
 
 static void SetDistanceValuePotentiometerTask(void *pvParameters)
 {
@@ -27,12 +32,16 @@ static void SetDistanceValuePotentiometerTask(void *pvParameters)
     ESP_ERROR_CHECK(adc_oneshot_config_channel(handleADC, ADC_PIN, &config));
 
     int distanceADC = 0;
+    int32_t mappedDistance_cm = 0;
 
     while(1)
     {
         ESP_ERROR_CHECK(adc_oneshot_read(handleADC, ADC_PIN, &distanceADC));
-        ESP_LOGI("Potentiometer", "Value: %d", distanceADC);
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        
+        mappedDistance_cm = mapValue(distanceADC, 0, 4095, 1, 100);
+        xQueueOverwrite(thresholdQueue, &mappedDistance_cm);
+
+        vTaskDelay(pdMS_TO_TICKS(500));
     }
 }
 
