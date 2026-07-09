@@ -51,12 +51,13 @@ static void ServoTask(void *pvParameters)
         // 0 -> 180
         for(int angle = 0; angle <= 180; angle += 10)
         {            
-
             while(xEventGroupGetBits(systemEventGroup) & BIT_ALARM_ON) {
                 vTaskDelay(pdMS_TO_TICKS(100)); 
             }
 
-            ESP_LOGI("RADAR", "Kat serwa: %d stopni", angle);
+            //ESP_LOGI("RADAR", "Kat serwa: %d stopni", angle);
+            
+            xQueueOverwrite(angleQueue, &angle);
 
             ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, angle_to_duty_cycle(angle));
             ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0);  
@@ -70,7 +71,9 @@ static void ServoTask(void *pvParameters)
                 vTaskDelay(pdMS_TO_TICKS(100)); 
             }
             
-            ESP_LOGI("RADAR", "Kat serwa: %d stopni", angle);
+            //ESP_LOGI("RADAR", "Kat serwa: %d stopni", angle);
+            
+            xQueueOverwrite(angleQueue, &angle);
 
             ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, angle_to_duty_cycle(angle));
             ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0);

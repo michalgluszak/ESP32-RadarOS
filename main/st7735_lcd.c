@@ -11,8 +11,8 @@
 #include "lvgl.h"
 #include "esp_lvgl_port.h"
 
-#include <st7735_lcd.h>
-
+#include "st7735_lcd.h"
+#include "Communication.h"
 
 // Definicje pinów
 #define PIN_NUM_CLK    18
@@ -87,24 +87,75 @@ void LCD_Task(void *pvParameters)
 
     printf("Tworzenie interfejsu użytkownika...\n");
 
-    // Zawsze blokujemy port przed modyfikacją UI
+    // --- BUDOWA INTERFEJSU LVGL ---
     lvgl_port_lock(0); 
 
-    // Ustawienie tła na czarne (Hex: 0x000000)
+    // Tło na czarne
     lv_obj_set_style_bg_color(lv_scr_act(), lv_color_hex(0x000000), 0);
 
-    // 
-    lv_obj_t *helloWorldText = lv_label_create(lv_scr_act());
-    lv_label_set_text(helloWorldText, "Hello World!");
-    lv_obj_set_style_text_color(helloWorldText, lv_color_hex(0xFFFFFF), 0); // Biały tekst
-    lv_obj_align(helloWorldText, LV_ALIGN_CENTER, 0, 40);
+    // 1. Etykieta Kąta Serwa
+    lv_obj_t *labelAngle = lv_label_create(lv_scr_act());
+    lv_label_set_text(labelAngle, "Kat: --");
+    lv_obj_set_style_text_color(labelAngle, lv_color_hex(0xFFFFFF), 0); // Biały
+    lv_obj_align(labelAngle, LV_ALIGN_CENTER, 0, -45); // Najwyżej
 
-    // Odblokowanie portu po narysowaniu elementów
+    // 2. Etykieta Zasięgu Radaru (Potencjometr)
+    lv_obj_t *labelThreshold = lv_label_create(lv_scr_act());
+    lv_label_set_text(labelThreshold, "Zasieg: -- cm");
+    lv_obj_set_style_text_color(labelThreshold, lv_color_hex(0xAAAAAA), 0); // Jasnoszary
+    lv_obj_align(labelThreshold, LV_ALIGN_CENTER, 0, 0); // Na środku
+
+    // 3. Etykieta Statusu / Wykrycia Obiektu
+    lv_obj_t *labelStatus = lv_label_create(lv_scr_act());
+    lv_label_set_text(labelStatus, "Czekam...");
+    lv_obj_set_style_text_color(labelStatus, lv_color_hex(0xFFFFFF), 0); // Biały
+    lv_obj_align(labelStatus, LV_ALIGN_CENTER, 0, 45); // Najniżej
+
     lvgl_port_unlock();
+    // -------------------------------
 
+    // --- GŁÓWNA PĘTLA ZADANIA ---
     while(1)
     {
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        int32_t current_angle = 0;
+        int32_t current_threshold = 0;
+        int32_t current_distance = 0;
+
+        if (lvgl_port_lock(0)) {
+            
+            // 1. Aktualizacja Kąta
+            if(xQueuePeek(angleQueue, &current_angle, 0) == pdTRUE) {
+                lv_label_set_text_fmt(labelAngle, "Kat: %d stopni", (int)current_angle); 
+            }
+
+            // 2. Aktualizacja Ustawionego Zasięgu
+            if(xQueuePeek(thresholdQueue, &current_threshold, 0) == pdTRUE) {
+                lv_label_set_text_fmt(labelThreshold, "Zasieg: %d cm", (int)current_threshold); 
+            }
+
+            // 3. Aktualizacja Statusu na podstawie flagi alarmu
+            if(xQueuePeek(distanceQueue, &current_distance, 0) == pdTRUE) {
+                
+                // Zrzutowanie flagi zdarzeń do zmiennej logicznej
+                if(xEventGroupGetBits(systemEventGroup) & BIT_ALARM_ON) 
+                {
+                    // ALARM! Tekst na żółto i pokazujemy dystans
+                    lv_obj_set_style_text_color(labelStatus, lv_color_hex(0xFFFF00), 0);
+                    lv_label_set_text_fmt(labelStatus, "Wykryto: %d cm", (int)current_distance);
+                } 
+                else 
+                {
+                    // CZYSTO! Tekst na biało i odpowiedni komunikat
+                    lv_obj_set_style_text_color(labelStatus, lv_color_hex(0xFFFFFF), 0);
+                    lv_label_set_text(labelStatus, "Status: Czysto");
+                }
+            }
+        
+            lvgl_port_unlock();
+        }
+
+        // Odświeżanie danych co 100 milisekund
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 

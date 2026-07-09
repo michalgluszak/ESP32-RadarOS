@@ -33,15 +33,18 @@ static void UltrasonicTask(void *pvParameters)
         if (res == ESP_OK) 
         {
             distance_cm = distance_m * 100.0f;
+            
+            int32_t dist_to_send = (int32_t)distance_cm;
+            xQueueOverwrite(distanceQueue, &dist_to_send);
 
-            if(distance_cm < currentSetDistance_cm)
+            if(distance_cm <= currentSetDistance_cm)
             {
-                ESP_LOGW("RADAR", "WYKRYTO OBIEKT! Odleglosc: %.1f cm (Celowano do: %d cm)", distance_cm, (int)currentSetDistance_cm);
+                //ESP_LOGW("RADAR", "WYKRYTO OBIEKT! Odleglosc: %.1f cm (Celowano do: %d cm)", distance_cm, (int)currentSetDistance_cm);
                 xEventGroupSetBits(systemEventGroup, BIT_ALARM_ON);
             }
             else
             {
-                ESP_LOGI("RADAR", "Czysto. Skanuje do: %d cm", (int)currentSetDistance_cm);
+                //ESP_LOGI("RADAR", "Czysto. Skanuje do: %d cm", (int)currentSetDistance_cm);
                 xEventGroupClearBits(systemEventGroup, BIT_ALARM_ON);
             }
         } 

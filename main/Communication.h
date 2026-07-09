@@ -5,10 +5,13 @@
 #include "freertos/queue.h"
 #include "freertos/event_groups.h"
 
-// Flagi dla Event Group
-#define BIT_ALARM_ON  (1 << 0) // Ustawiamy bit 0
+
+#define BIT_ALARM_ON  (1 << 0)
 
 extern QueueHandle_t thresholdQueue;
+extern QueueHandle_t angleQueue;    
+extern QueueHandle_t distanceQueue;  
+
 extern EventGroupHandle_t systemEventGroup;
 
 void init_communication(void);
