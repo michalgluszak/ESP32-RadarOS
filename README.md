@@ -1,4 +1,4 @@
-# ESP32 RadarOS 📡
+# ESP32 RadarOS
 
 ## About the Project
 The **RadarOS** project was created as part of a **FreeRTOS** real-time operating system course at university. Its main goal is to demonstrate multitasking, hardware management, and inter-process communication in embedded systems. 
@@ -12,19 +12,19 @@ The device works as an active radar that scans the surroundings in a 180-degree 
 Below is the list of hardware used to build the radar:
 
 * **ESP32 Microcontroller** – The "brain" of the whole system, running the FreeRTOS system.
-<br><img src="Images/esp32.png" width="250" alt="ESP32">
+<br><img src="Images/esp32.png" width="200" alt="ESP32">
 
 * **SG90 Servo Motor** – Responsible for the smooth rotation of the sensor from 0 to 180°.
 <br><img src="Images/servomotor.png" width="200" alt="Servo Motor">
 
 * **HC-SR04 Ultrasonic Sensor** – Makes precise distance measurements from obstacles.
-<br><img src="Images/ultrasonic.png" width="250" alt="Ultrasonic Sensor">
+<br><img src="Images/ultrasonic.png" width="200" alt="Ultrasonic Sensor">
 
 * **Analog Potentiometer** – Used for smooth adjustment of the alarm range threshold (from 1 cm to 100 cm).
 <br><img src="Images/potencjometr.png" width="200" alt="Potentiometer">
 
 * **Buzzer (Active)** – A sound indicator that informs about detecting an object in the zone.
-<br><img src="Images/buzzer.png" width="150" alt="Buzzer">
+<br><img src="Images/buzzer.png" width="200" alt="Buzzer">
 
 * **ST7735 TFT LCD Display (128x160, SPI)** – A graphical user interface (UI) based on the LVGL library, showing the current status of the radar.
 <br><img src="Images/lcd.png" width="200" alt="LCD Display">
@@ -53,7 +53,7 @@ All peripherals are connected to the ESP32 microcontroller according to the tabl
 
 ---
 
-## ⏱️ Task Priorities
+## Task Priorities
 
 To make the system run stably as an RTOS (Real-Time Operating System), a strict hierarchy of priorities is assigned to each task (where 5 is the highest priority and 1 is the lowest):
 
@@ -78,18 +78,3 @@ The project is divided into modular `.c` and `.h` files, and each of them has a 
 * **`st7735_lcd.c`** – Manages the SPI bus and the powerful **LVGL** graphics engine. This task works as a passive data "consumer" – it asynchronously peeks (`xQueuePeek`) at values in the queues and draws the user interface in real time, using changing colors for alerts.
 
 ---
-
-## ⚠️ Important Startup and Assembly Notes
-
-Before you run the project on your device, pay attention to two important details:
-
-1. **Running the logic in the code:** After cloning the repository, make sure that the lines responsible for starting the system in the `main.c` file are not commented out. For the program to work, the `init_communication();` and `allTask();` functions must be called inside `app_main()`.
-2. **Sensor assembly:** According to the radar concept, the HC-SR04 ultrasonic sensor should be physically mounted on the servo motor arm (this can be done using zip ties, rubber bands, or a special 3D-printed mount). For demonstration purposes (photos/videos), to keep the connections on the breadboard clear and easy to read, the sensor and the servo motor were placed separately.
-
----
-
-## 📸 Project Operation in Practice
-
-Below is a visualization of how the system works:
-
-<img src="Images/howitwork.mov" width="800" alt="Radar operation demonstration">
