@@ -50,7 +50,7 @@ static void UltrasonicTask(void *pvParameters)
         } 
         else
         {
-            ESP_LOGW("UltraSonic", "Blad pomiaru: %s", esp_err_to_name(res));
+            //ESP_LOGW("UltraSonic", "Blad pomiaru: %s", esp_err_to_name(res));
         }
 
         vTaskDelay(pdMS_TO_TICKS(100));

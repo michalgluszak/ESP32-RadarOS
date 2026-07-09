@@ -14,20 +14,20 @@
 #include "st7735_lcd.h"
 #include "Communication.h"
 
-// Definicje pinów
+//PIN OUT
 #define PIN_NUM_CLK    18
 #define PIN_NUM_MOSI   23
 #define PIN_NUM_CS     5
 #define PIN_NUM_DC     2
 #define PIN_NUM_RST    4
 
-// Rozdzielczość
+//Resolution
 #define LCD_H_RES      128
 #define LCD_V_RES      160
 
 void LCD_Task(void *pvParameters)
 {
-    printf("Inicjalizacja magistrali SPI...\n");
+    printf("Initializing SPI bus...\n");
     spi_bus_config_t buscfg = {
         .sclk_io_num = PIN_NUM_CLK,
         .mosi_io_num = PIN_NUM_MOSI,
@@ -38,7 +38,7 @@ void LCD_Task(void *pvParameters)
     };
     ESP_ERROR_CHECK(spi_bus_initialize(SPI2_HOST, &buscfg, SPI_DMA_CH_AUTO));
 
-    printf("Inicjalizacja interfejsu IO panelu...\n");
+    printf("Initializing panel IO interface...\n");
     esp_lcd_panel_io_handle_t io_handle = NULL;
     esp_lcd_panel_io_spi_config_t io_config = {
         .dc_gpio_num = PIN_NUM_DC,
@@ -51,7 +51,7 @@ void LCD_Task(void *pvParameters)
     };
     ESP_ERROR_CHECK(esp_lcd_new_panel_io_spi((esp_lcd_spi_bus_handle_t)SPI2_HOST, &io_config, &io_handle));
 
-    printf("Instalacja sterownika ST7735...\n");
+    printf("Installing ST7735 driver...\n");
     esp_lcd_panel_handle_t panel_handle = NULL;
     esp_lcd_panel_dev_config_t panel_config = {
         .reset_gpio_num = PIN_NUM_RST,
@@ -65,7 +65,7 @@ void LCD_Task(void *pvParameters)
     ESP_ERROR_CHECK(esp_lcd_panel_invert_color(panel_handle, false)); 
     ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(panel_handle, true));
 
-    printf("Uruchamianie silnika LVGL...\n");
+    printf("Starting LVGL engine...\n");
     
     const lvgl_port_cfg_t lvgl_cfg = ESP_LVGL_PORT_INIT_CONFIG();
     lvgl_port_init(&lvgl_cfg); 
@@ -85,36 +85,36 @@ void LCD_Task(void *pvParameters)
     };
     lvgl_port_add_disp(&disp_cfg); 
 
-    printf("Tworzenie interfejsu użytkownika...\n");
+    printf("Creating user interface...\n");
 
-    // --- BUDOWA INTERFEJSU LVGL ---
+    // --- BUILDING LVGL INTERFACE ---
     lvgl_port_lock(0); 
 
-    // Tło na czarne
+    // Background to black
     lv_obj_set_style_bg_color(lv_scr_act(), lv_color_hex(0x000000), 0);
 
-    // 1. Etykieta Kąta Serwa
+    // 1. Servo Angle Label
     lv_obj_t *labelAngle = lv_label_create(lv_scr_act());
-    lv_label_set_text(labelAngle, "Kat: --");
-    lv_obj_set_style_text_color(labelAngle, lv_color_hex(0xFFFFFF), 0); // Biały
-    lv_obj_align(labelAngle, LV_ALIGN_CENTER, 0, -45); // Najwyżej
+    lv_label_set_text(labelAngle, "Angle: --");
+    lv_obj_set_style_text_color(labelAngle, lv_color_hex(0xFFFFFF), 0); // White
+    lv_obj_align(labelAngle, LV_ALIGN_CENTER, 0, -45); // Top
 
-    // 2. Etykieta Zasięgu Radaru (Potencjometr)
+    // 2. Radar Range Label (Potentiometer)
     lv_obj_t *labelThreshold = lv_label_create(lv_scr_act());
-    lv_label_set_text(labelThreshold, "Zasieg: -- cm");
-    lv_obj_set_style_text_color(labelThreshold, lv_color_hex(0xAAAAAA), 0); // Jasnoszary
-    lv_obj_align(labelThreshold, LV_ALIGN_CENTER, 0, 0); // Na środku
+    lv_label_set_text(labelThreshold, "Range: -- cm");
+    lv_obj_set_style_text_color(labelThreshold, lv_color_hex(0xAAAAAA), 0); // Light gray
+    lv_obj_align(labelThreshold, LV_ALIGN_CENTER, 0, 0); // Center
 
-    // 3. Etykieta Statusu / Wykrycia Obiektu
+    // 3. Status / Object Detection Label
     lv_obj_t *labelStatus = lv_label_create(lv_scr_act());
-    lv_label_set_text(labelStatus, "Czekam...");
-    lv_obj_set_style_text_color(labelStatus, lv_color_hex(0xFFFFFF), 0); // Biały
-    lv_obj_align(labelStatus, LV_ALIGN_CENTER, 0, 45); // Najniżej
+    lv_label_set_text(labelStatus, "Waiting...");
+    lv_obj_set_style_text_color(labelStatus, lv_color_hex(0xFFFFFF), 0); // White
+    lv_obj_align(labelStatus, LV_ALIGN_CENTER, 0, 45); // Bottom
 
     lvgl_port_unlock();
     // -------------------------------
 
-    // --- GŁÓWNA PĘTLA ZADANIA ---
+    // --- MAIN TASK LOOP ---
     while(1)
     {
         int32_t current_angle = 0;
@@ -123,38 +123,38 @@ void LCD_Task(void *pvParameters)
 
         if (lvgl_port_lock(0)) {
             
-            // 1. Aktualizacja Kąta
+            // 1. Update Angle
             if(xQueuePeek(angleQueue, &current_angle, 0) == pdTRUE) {
-                lv_label_set_text_fmt(labelAngle, "Kat: %d stopni", (int)current_angle); 
+                lv_label_set_text_fmt(labelAngle, "Angle: %d degrees", (int)current_angle); 
             }
 
-            // 2. Aktualizacja Ustawionego Zasięgu
+            // 2. Update Set Range
             if(xQueuePeek(thresholdQueue, &current_threshold, 0) == pdTRUE) {
-                lv_label_set_text_fmt(labelThreshold, "Zasieg: %d cm", (int)current_threshold); 
+                lv_label_set_text_fmt(labelThreshold, "Range: %d cm", (int)current_threshold); 
             }
 
-            // 3. Aktualizacja Statusu na podstawie flagi alarmu
+            // 3. Update Status based on alarm flag
             if(xQueuePeek(distanceQueue, &current_distance, 0) == pdTRUE) {
                 
-                // Zrzutowanie flagi zdarzeń do zmiennej logicznej
+                // Read event flag for the alarm state
                 if(xEventGroupGetBits(systemEventGroup) & BIT_ALARM_ON) 
                 {
-                    // ALARM! Tekst na żółto i pokazujemy dystans
+                    // ALARM! Text to yellow and show distance
                     lv_obj_set_style_text_color(labelStatus, lv_color_hex(0xFFFF00), 0);
-                    lv_label_set_text_fmt(labelStatus, "Wykryto: %d cm", (int)current_distance);
+                    lv_label_set_text_fmt(labelStatus, "Detected: %d cm", (int)current_distance);
                 } 
                 else 
                 {
-                    // CZYSTO! Tekst na biało i odpowiedni komunikat
+                    // CLEAR! Text to white and appropriate message
                     lv_obj_set_style_text_color(labelStatus, lv_color_hex(0xFFFFFF), 0);
-                    lv_label_set_text(labelStatus, "Status: Czysto");
+                    lv_label_set_text(labelStatus, "Status: Clear");
                 }
             }
         
             lvgl_port_unlock();
         }
 
-        // Odświeżanie danych co 100 milisekund
+        // Refresh data every 100 milliseconds
         vTaskDelay(pdMS_TO_TICKS(100));
     }
 }

@@ -5,7 +5,6 @@
 #include "freertos/queue.h"
 #include "freertos/event_groups.h"
 
-
 #define BIT_ALARM_ON  (1 << 0)
 
 extern QueueHandle_t thresholdQueue;
