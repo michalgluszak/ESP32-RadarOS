@@ -92,4 +92,4 @@ Before you run the project on your device, pay attention to two important detail
 
 Below is a visualization of how the system works:
 
-<img src="Images/howitwork.png" width="800" alt="Radar operation demonstration">
+<img src="Images/howitwork.mov" width="800" alt="Radar operation demonstration">
