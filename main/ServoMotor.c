@@ -84,5 +84,5 @@ static void ServoTask(void *pvParameters)
 
 void start_servomotor_task(void)
 {
-    xTaskCreate(ServoTask, "Servo_Task", 2048, NULL, 5, NULL);
+    xTaskCreate(ServoTask, "Servo_Task", 2048, NULL, 3, NULL);
 }

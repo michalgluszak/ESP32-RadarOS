@@ -161,5 +161,5 @@ void LCD_Task(void *pvParameters)
 
 void start_st7735_task(void)
 {
-    xTaskCreate(LCD_Task, "LCD_Task", 4096, NULL, 5, NULL);
+    xTaskCreate(LCD_Task, "LCD_Task", 4096, NULL, 1, NULL);
 }

@@ -18,6 +18,6 @@ void allTask(void)
 
 void app_main(void)
 {
-    //init_communication();
-    //allTask();
+    init_communication();
+    allTask();
 }

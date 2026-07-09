@@ -59,5 +59,5 @@ static void UltrasonicTask(void *pvParameters)
 
 void start_ultrasonic_task(void)
 {
-    xTaskCreate(UltrasonicTask, "Ultrasonic_Task", 2048, NULL, 5, NULL);
+    xTaskCreate(UltrasonicTask, "Ultrasonic_Task", 2048, NULL, 4, NULL);
 }

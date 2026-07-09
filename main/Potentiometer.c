@@ -47,5 +47,5 @@ static void SetDistanceValuePotentiometerTask(void *pvParameters)
 
 void start_potentiometer_task(void)
 {
-    xTaskCreate(SetDistanceValuePotentiometerTask, "Potentiometer Task", 2048, NULL, 5, NULL);
+xTaskCreate(SetDistanceValuePotentiometerTask, "Potentiometer Task", 2048, NULL, 2, NULL);
 }
